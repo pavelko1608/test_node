@@ -1,7 +1,7 @@
 const app = require("express")()
 const bodyParser = require("body-parser")
 const path = require("path")
-const db = require("./db")
+const {Cars, Appointments} = require("./models")
 
 app
 .set('port', process.env.PORT || 3000)
@@ -10,8 +10,8 @@ app
 .set("views", path.join(__dirname, "views"))
 .set("view engine", "pug")
 .get("/", (req, res) => {
-	db.cars.findAll().then((cars_data) => {
-		db.appointments.findAll().then((appointments_data) => {
+	Cars.findAll().then((cars_data) => {
+		Appointments.findAll().then((appointments_data) => {
 			let val
 			const data = []
 			cars_data.forEach((car) => {
@@ -38,21 +38,19 @@ app
 // 	db.cars.create({model: "Mercedes"}).then((car) => console.log(car.model))
 // })
 .post("/createAppointment/:car_id/", (req, res) => {
-	db.appointments.create({car_id: req.params.car_id, time: req.body.time})
+	Appointments.create({car_id: req.params.car_id, time: req.body.time})
 	.then((result) => res.json(result.dataValues))
 })
 .put("/updateAppointment/:id/", (req, res) => {
-	db.appointments.update(
+	Appointments.update(
 		{ time: req.body.time },
   		{ where: { id: req.params.id } })
-	.then((result) => {
-		res.json(result)
-	})
+	.then(result => res.json(result))
 })
 .delete("/deleteAppointment/:id", (req, res) => {
-	db.appointments.destroy({where: {
+	Appointments.destroy({where: {
 		id: req.params.id
-	}}).then((result) => res.json(result))
+	}}).then(result => res.json(result))
 })
 
 .listen(app.get("port"), () => {

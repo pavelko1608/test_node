@@ -1,4 +1,6 @@
-const db  = require("./db")
+const models = require("./models")
+
+const Cars = models.Cars
 
 const car_models = [
 	"Tesla Model S",
@@ -10,6 +12,6 @@ const car_models = [
 
 
 	car_models.forEach((model) => {
-	db.cars.create({model: model})
+	Cars.create({model: model})
 })
 
