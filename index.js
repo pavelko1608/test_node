@@ -27,32 +27,32 @@ app
 				}
 				data.push(val)
 			})
-		res.render("index", {data: data})
+		res.json(data)
 		})
 		
 	})
 })
-.get("/createCar", (req, res) => {
-	db.cars.create({model: "Toyota"}).then((car) => console.log(car.model))
-	db.cars.create({model: "Ford"}).then((car) => console.log(car.model))
-	db.cars.create({model: "Mercedes"}).then((car) => console.log(car.model))
-})
+// .get("/createCar", (req, res) => {
+// 	db.cars.create({model: "Toyota"}).then((car) => console.log(car.model))
+// 	db.cars.create({model: "Ford"}).then((car) => console.log(car.model))
+// 	db.cars.create({model: "Mercedes"}).then((car) => console.log(car.model))
+// })
 .post("/createAppointment/:car_id/", (req, res) => {
 	db.appointments.create({car_id: req.params.car_id, time: req.body.time})
-	.then((result) => res.redirect("/"))
+	.then((result) => res.json(result.dataValues))
 })
-.post("/updateAppointment/:id/", (req, res) => {
+.put("/updateAppointment/:id/", (req, res) => {
 	db.appointments.update(
 		{ time: req.body.time },
   		{ where: { id: req.params.id } })
-	.then(() => {
-		res.redirect("/")
+	.then((result) => {
+		res.json(result)
 	})
 })
-.post("/deleteAppointment/:id", (req, res) => {
+.delete("/deleteAppointment/:id", (req, res) => {
 	db.appointments.destroy({where: {
 		id: req.params.id
-	}}).then(() => res.redirect("/"))
+	}}).then((result) => res.json(result))
 })
 
 .listen(app.get("port"), () => {
