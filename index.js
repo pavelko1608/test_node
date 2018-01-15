@@ -2,6 +2,8 @@ const app = require("express")()
 const bodyParser = require("body-parser")
 const path = require("path")
 const {Cars, Appointments} = require("./models")
+const { check, validationResult } = require('express-validator/check')
+
 
 app
 .set('port', process.env.PORT || 3000)
@@ -32,25 +34,77 @@ app
 		
 	})
 })
-// .get("/createCar", (req, res) => {
-// 	db.cars.create({model: "Toyota"}).then((car) => console.log(car.model))
-// 	db.cars.create({model: "Ford"}).then((car) => console.log(car.model))
-// 	db.cars.create({model: "Mercedes"}).then((car) => console.log(car.model))
-// })
-.post("/createAppointment/:car_id/", (req, res) => {
-	Appointments.create({car_id: req.params.car_id, time: req.body.time})
-	.then((result) => res.json(result.dataValues))
+.post("/createAppointment/:car_id/", [
+	check("time", "You need to enter time").exists(),
+	check("car_id", "it's got to be a valid id").isLength({ min: 36 , max: 36})
+	], (req, res) => {
+		const errors = validationResult(req);
+  		if (!errors.isEmpty()) {
+    		return res.status(422).json({ errors: errors.mapped() });
+  		}
+  		Cars.findOne({where: {id: req.params.car_id}})
+  		.then((result) => {
+  			if(result) {
+  				Appointments.create({car_id: req.params.car_id, time: req.body.time})
+  				.then(result => res.json(result.dataValues))
+  			} else {
+  				let err = new Error("Bad request")
+				err.status = 400
+				throw err
+  			}
+  		})
+  		.catch((err) => res.json({
+			status: err.status,
+			message: err.message
+		}))
 })
-.put("/updateAppointment/:id/", (req, res) => {
+.put("/updateAppointment/:id/", [
+		check("time", "You need to enter time").exists(),
+		check("id", "it's got to be a valid id").isLength({ min: 36 , max: 36})
+	], (req, res) => {
+		const errors = validationResult(req);
+  		if (!errors.isEmpty()) {
+    		return res.status(422).json({ errors: errors.mapped() });
+  		}
 	Appointments.update(
 		{ time: req.body.time },
   		{ where: { id: req.params.id } })
-	.then(result => res.json(result))
+	.then((result) => {
+		if(result.dataValues) {
+			res.json(result)
+		} else {
+			let err = new Error("Bad request")
+			err.status = 400
+			throw err
+		}
+	})
+	.catch((err) => res.json({
+		status: err.status,
+		message: err.message
+	}))
 })
-.delete("/deleteAppointment/:id", (req, res) => {
+.delete("/deleteAppointment/:id", [
+		check("id", "it's got to be a valid id").isLength({ min: 36 , max: 36})
+	], (req, res) => {
+		const errors = validationResult(req);
+  		if (!errors.isEmpty()) {
+    		return res.status(422).json({ errors: errors.mapped() });
+  		}
 	Appointments.destroy({where: {
 		id: req.params.id
-	}}).then(result => res.json(result))
+	}}).then((result) => {
+		if(result) {
+			res.json(result)
+		} else {
+			let err = new Error("Bad request")
+			err.status = 400
+			throw err
+		}
+	})
+	.catch((err) => res.json({
+		status: err.status,
+		message: err.message
+	}))
 })
 
 .listen(app.get("port"), () => {
