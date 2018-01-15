@@ -1,0 +1,24 @@
+html
+	head
+		meta(charset="UTF-8")
+		title Cars and appointments
+		link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css")
+	body(class="mt-5")
+		div(class="container")
+			for item in data
+				h1(class="header") Appointments for #{item.car.model}
+				ul
+					for appointment in item.appointments
+						li #{appointment.time}
+						div(class="form-group")
+							form(action="/deleteAppointment/" + appointment.id, method="post")
+								button(type="submit" class="btn btn-danger") Delete
+						div(class="form-group")
+							form(action="/updateAppointment/" + appointment.id, method="post")
+								input(class="form-control", type="datetime-local" name="time" placeholder="Time")
+								button(type="submit", class="btn btn-primary mt-2") Update
+				form(action="/createAppointment/" + item.car.id,  method="post")
+					div(class="form-group")
+						input(type="datetime-local" class="form-control" name="time" placeholder="Time")
+					button(type="submit" class="btn btn-primary") Submit
+			
